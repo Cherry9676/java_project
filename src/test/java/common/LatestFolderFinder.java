@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 
 public class LatestFolderFinder {
 
-	private static final Pattern FOLDER_PATTERN = Pattern.compile("SparkReport (\\d+-\\w+-\\d+ \\d+-\\d+-\\d+)");
+	private static final Pattern FOLDER_PATTERN = Pattern.compile("(\\d+-\\w+-\\d+ \\d+-\\d+-\\d+)");
 	private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("d-MMM-yy H-mm-ss");
 
 	public static String GetLatestFolderName(String path) {

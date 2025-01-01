@@ -31,21 +31,38 @@ public class ExtentReportListener {
 	public void setup(Scenario scenario) {
 		if (extent == null) {
 			String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+
+			// Original report with timestamp
 			String reportDirPath = System.getProperty("user.dir") + "/ExtentReports/" + timeStamp;
 			File reportDir = new File(reportDirPath);
 			if (!reportDir.exists()) {
 				reportDir.mkdirs(); // Create directories if they don't exist
 			}
+			String reportFilePathWithTimestamp = reportDirPath + "/extentReport.html";
 
-			String reportFilePath = reportDirPath + "/extentReport.html";
+			// New report without timestamp
+			String reportDirPathWithoutTimestamp = System.getProperty("user.dir") + "/ExtentReports/";
+			File reportDirWithoutTimestamp = new File(reportDirPathWithoutTimestamp);
+			if (!reportDirWithoutTimestamp.exists()) {
+				reportDirWithoutTimestamp.mkdirs();
+			}
+			String reportFilePathWithoutTimestamp = reportDirPathWithoutTimestamp + "Report.html";
 
-			ExtentHtmlReporter htmlReporter = new ExtentHtmlReporter(reportFilePath);
+			ExtentHtmlReporter htmlReporter = new ExtentHtmlReporter(reportFilePathWithTimestamp);
 			htmlReporter.config().setTheme(Theme.STANDARD);
 			htmlReporter.config().setDocumentTitle("BDD Test Report");
 			htmlReporter.config().setReportName(scenario.getName());
 
 			extent = new ExtentReports();
 			extent.attachReporter(htmlReporter);
+
+			// Attach another report without timestamp
+			ExtentHtmlReporter htmlReporterWithoutTimestamp = new ExtentHtmlReporter(reportFilePathWithoutTimestamp);
+			htmlReporterWithoutTimestamp.config().setTheme(Theme.STANDARD);
+			htmlReporterWithoutTimestamp.config().setDocumentTitle("BDD Test Report");
+			htmlReporterWithoutTimestamp.config().setReportName(scenario.getName());
+
+			extent.attachReporter(htmlReporterWithoutTimestamp);
 		}
 
 		test = extent.createTest(scenario.getName());
