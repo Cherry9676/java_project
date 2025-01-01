@@ -1,8 +1,0 @@
-Test Tags:
-@test002,@test001
-
-Set Tags:
-@set21
-
-Other Tags:
-@uida1339186252,@Test_Scenario_1,@Test_Scenario_2
