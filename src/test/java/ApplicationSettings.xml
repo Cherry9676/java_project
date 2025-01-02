@@ -2,7 +2,7 @@
 <ApplicationSettings>
     <URL>https://the-internet.herokuapp.com/dynamic_controls</URL>
     <APIURL/>
-    <BrowserType>Chrome</BrowserType>
+    <BrowserType>Headless Chrome</BrowserType>
     <EnableDebugLog>False</EnableDebugLog>
     <WebdriverPath>Na</WebdriverPath>
     <PrintTextInConsole>False</PrintTextInConsole>
