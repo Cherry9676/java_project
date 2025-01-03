@@ -1,65 +1,48 @@
 pipeline {
     agent any
     stages {
-        stage('Clone Repository') {
+        stage('Clean Workspace and Clone Repository') {
             steps {
-                echo 'Cloning the Git repository...'
+                echo 'Cleaning up the workspace and cloning the repository...'
                 script {
-                    def projectDir = 'java_project'
-                    if (fileExists(projectDir)) {
-                        echo "Directory '${projectDir}' exists. Pulling latest changes..."
-                        bat """
-                        cd ${projectDir}
-                        git reset --hard
-                        git pull
-                        """
+                    // Ensure the workspace is clean
+                    if (fileExists('java_project')) {
+                        echo 'Deleting the existing java_project directory...'
+                        bat 'rmdir /s /q java_project'
                     } else {
-                        echo "Directory '${projectDir}' does not exist. Cloning repository..."
-                        bat "git clone https://github.com/Cherry9676/java_project.git"
+                        echo 'No existing directory to delete.'
                     }
                 }
+                echo 'Cloning the repository...'
+                bat 'git clone https://github.com/Cherry9676/java_project.git'
             }
         }
+        
+        stage('Clean the Project') {
+            steps {
+                echo 'Cleaning the Maven project...'
+                bat 'mvn clean -f java_project/pom.xml'
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                echo 'Installing dependencies for the project...'
+                bat 'mvn install -f java_project/pom.xml'
+            }
+        }
+
         stage('Run Tests') {
             steps {
-                echo 'Navigating to the project directory and running tests...'
-                bat '''
-                cd java_project
-                mvn clean test
-                '''
-            }
-        }
-        stage('Send Report') {
-            steps {
-                echo 'Sending test report via email...'
-                script {
-                    def reportFile = 'java_project/ExtentReports/Report.html'
-                    if (fileExists(reportFile)) {
-                        emailext(
-                            subject: "Build - Test Report",
-                            body: """
-                                <p>Build Details:</p>
-                                <ul>
-                                    <li>Project Name: Java Project</li>
-                                    <li>Build Number: ${env.BUILD_NUMBER}</li>
-                                    <li>Build Status: ${currentBuild.currentResult}</li>
-                                </ul>
-                                <p>Find the attached test report below.</p>
-                            """,
-                            to: 'sankarcherry1432@gmail.com',
-                            mimeType: 'text/html',
-                            attachmentsPattern: '**/ExtentReports/Report.html'
-                        )
-                    } else {
-                        echo "Test report not found at ${reportFile}."
-                    }
-                }
+                echo 'Running the test scripts...'
+                bat 'mvn test -f java_project/pom.xml'
             }
         }
     }
     post {
         always {
-            echo 'Pipeline execution completed.'
+            echo 'Pipeline execution completed. Cleaning up workspace...'
+            cleanWs()
         }
     }
 }
