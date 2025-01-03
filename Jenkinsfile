@@ -5,7 +5,6 @@ pipeline {
             steps {
                 echo 'Cleaning up the workspace and cloning the repository...'
                 script {
-                    // Ensure the workspace is clean
                     if (fileExists('java_project')) {
                         echo 'Deleting the existing java_project directory...'
                         bat 'rmdir /s /q java_project'
@@ -17,32 +16,44 @@ pipeline {
                 bat 'git clone https://github.com/Cherry9676/java_project.git'
             }
         }
-        
-        stage('Clean the Project') {
+
+        stage('Clean and Run Tests') {
             steps {
-                echo 'Cleaning the Maven project...'
-                bat 'mvn clean -f java_project/pom.xml'
+                echo 'Cleaning and running tests using Maven...'
+                bat 'mvn clean test -f java_project/pom.xml'
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Send Report') {
             steps {
-                echo 'Installing dependencies for the project...'
-                bat 'mvn install -f java_project/pom.xml'
-            }
-        }
-
-        stage('Run Tests') {
-            steps {
-                echo 'Running the test scripts...'
-                bat 'mvn test -f java_project/pom.xml'
+                echo 'Sending test report via email...'
+                script {
+                    def reportFile = 'java_project/ExtentReports/Report.html'
+                    if (fileExists(reportFile)) {
+                        emailext(
+                            subject: "Build - Test Report",
+                            body: """
+                                <p>Build Details:</p>
+                                <ul>
+                                    <li>Project Name: MyProject</li>
+                                    <li>Build Type: Sanity Suite</li>
+                                </ul>
+                                <p>Find the attached test report below.</p>
+                            """,
+                            to: 'sankarcherry1432@gmail.com',
+                            mimeType: 'text/html',
+                            attachmentsPattern: '**/ExtentReports/Report.html'
+                        )
+                    } else {
+                        echo "Test report not found at ${reportFile}."
+                    }
+                }
             }
         }
     }
     post {
         always {
             echo 'Pipeline execution completed. Cleaning up workspace...'
-            cleanWs()
         }
     }
 }
